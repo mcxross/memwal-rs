@@ -1,0 +1,62 @@
+[workspace]
+members = [
+    "crates/memwal-core",
+    "crates/memwal-demo",
+    "external-crates/seal-sdk-rs"
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+
+[workspace.lints]
+rust = {}
+
+[workspace.dependencies]
+async-trait = "0.1.89"
+anyhow = "1.0"
+base64 = "0.22"
+bcs = "0.1.6"
+bech32 = "0.11.1"
+bytes = "1.10.1"
+chrono = "0.4.43"
+futures = "0.3"
+hex = "0.4"
+http = "0.2"
+log = "0.4"
+moka = { version = "0.12.11", features = ["future"] }
+rand = "0.8"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls-native-roots"] }
+semver = "1.0"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+thiserror = "2.0.17"
+tokio = { version = "1.49.0", features = ["macros", "rt-multi-thread", "sync", "time"] }
+tonic = { version = "0.14.3", default-features = false, features = ["channel", "codegen"] }
+tracing = "0.1.44"
+url = "2"
+uuid = { version = "1", features = ["v4"] }
+zeroize = "1.8.2"
+wiremock = "0.6"
+testcontainers = "0.25.0"
+
+fastcrypto = { git = "https://github.com/MystenLabs/fastcrypto", rev = "d1fcb853196c3de7888ed8fad74f419b8c8fbe3b", features = ["aes"] }
+seal_crypto = { package = "crypto", git = "https://github.com/mystenlabs/seal", rev = "6755476d6f2eb4e7069f073228516a8eb7c7c1ea" }
+
+seal-sdk-rs = { path = "external-crates/seal-sdk-rs", default-features = false, features = ["client", "native-sui-sdk"] }
+
+sui-crypto = { git = "https://github.com/mystenlabs/sui-rust-sdk", rev = "49345f1ca16cee967e8d045ad965e0a764d7e95b", features = ["bech32", "ed25519"] }
+sui-rpc = { git = "https://github.com/mystenlabs/sui-rust-sdk", rev = "49345f1ca16cee967e8d045ad965e0a764d7e95b" }
+sui-sdk-types = { git = "https://github.com/mystenlabs/sui-rust-sdk", rev = "49345f1ca16cee967e8d045ad965e0a764d7e95b", features = ["hash", "serde"] }
+sui-transaction-builder = { git = "https://github.com/mystenlabs/sui-rust-sdk", rev = "49345f1ca16cee967e8d045ad965e0a764d7e95b" }
+
+sui_types = { package = "sui-types", git = "https://github.com/mystenlabs/sui", rev = "b8fbacf" }
+sui_keys = { package = "sui-keys", git = "https://github.com/mystenlabs/sui", rev = "b8fbacf" }
+sui_sdk = { package = "sui-sdk", git = "https://github.com/mystenlabs/sui", rev = "b8fbacf" }
+shared_crypto = { package = "shared-crypto", git = "https://github.com/MystenLabs/sui", rev = "b8fbacf" }
+sui_json_rpc_types = { package = "sui-json-rpc-types", git = "https://github.com/mystenlabs/sui", rev = "b8fbacf" }
+prost-types = "0.14.4"
+memwal-core = { path = "crates/memwal-core" }

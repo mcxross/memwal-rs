@@ -1,0 +1,8 @@
+[package]
+name = "memwal-demo"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+memwal-core = { workspace = true }
+tokio = { workspace = true }

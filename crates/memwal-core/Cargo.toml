@@ -1,0 +1,48 @@
+[package]
+name = "memwal-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+name = "memwal_core"
+doctest = false
+
+[dependencies]
+async-trait = { workspace = true }
+base64 = { workspace = true }
+bcs = { workspace = true }
+bech32 = { workspace = true }
+bytes = { workspace = true }
+chrono = { workspace = true }
+futures = { workspace = true }
+hex = { workspace = true }
+http = { workspace = true }
+rand = { workspace = true }
+reqwest = { workspace = true }
+semver = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+sha2 = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true }
+tonic = { workspace = true }
+tracing = { workspace = true }
+url = { workspace = true }
+uuid = { workspace = true }
+zeroize = { workspace = true }
+
+fastcrypto = { workspace = true }
+seal-sdk-rs = { workspace = true }
+
+sui-crypto = { workspace = true }
+sui-rpc = { workspace = true }
+sui-sdk-types = { workspace = true }
+sui-transaction-builder = { workspace = true }
+prost-types = { workspace = true }
+
+[dev-dependencies]
+wiremock = { workspace = true }
+
+[lints]
+workspace = true
