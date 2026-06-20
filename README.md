@@ -33,7 +33,7 @@ async fn main() -> Result<(), memwal_core::MemWalError> {
     let memwal = provisioned.memwal();
 
     let remembered = memwal
-        .remember_and_wait(
+        .remember(
             "User prefers dark mode and uses Rust.",
             Duration::from_millis(1500),
             Duration::from_secs(60),
@@ -159,8 +159,8 @@ println!("matches: {}", recalled.results.len());
 
 Common `MemWal` methods:
 
-- `remember(text)` submits a memory write and returns a job ID.
-- `remember_and_wait(text, poll_interval, timeout)` submits and waits for completion.
+- `remember_async(text)` submits a memory write and returns a job ID.
+- `remember(text, poll_interval, timeout)` submits and waits for completion.
 - `remember_bulk(items)` and `remember_bulk_and_wait(items, poll_interval, timeout)` handle batch writes.
 - `recall(params)` searches memory.
 - `analyze(options)` and `analyze_and_wait(options, poll_interval, timeout)` run relayer analysis jobs.

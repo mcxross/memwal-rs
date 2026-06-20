@@ -22,7 +22,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("  Remembering text...");
     let result = memwal
-        .remember_and_wait(
+        .remember(
             "User prefers dark mode and uses Rust.",
             Duration::from_millis(1500),
             Duration::from_secs(60),

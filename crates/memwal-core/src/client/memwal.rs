@@ -34,7 +34,6 @@ use crate::types::RememberJobStatus;
 use crate::types::RememberRequest;
 use crate::types::RememberResult;
 use crate::types::RestoreResult;
-use crate::utils::DEFAULT_RELAYER_URL;
 
 #[derive(Clone)]
 pub struct MemWal {
@@ -62,7 +61,7 @@ impl MemWalConfig {
         Self {
             delegate_key,
             account_id,
-            server_url: server_url.unwrap_or_else(|| DEFAULT_RELAYER_URL.to_owned()),
+            server_url: server_url.unwrap_or("https://relayer.memwal.ai/".to_owned()),
             namespace: namespace.unwrap_or("default".to_owned()),
         }
     }
@@ -85,7 +84,7 @@ impl MemWal {
         })
     }
 
-    pub async fn remember(&self, text: &str) -> Result<RememberAcceptedResult, MemWalError> {
+    pub async fn remember_async(&self, text: &str) -> Result<RememberAcceptedResult, MemWalError> {
         let body = RememberRequest {
             text,
             namespace: &self.namespace,
@@ -188,13 +187,13 @@ impl MemWal {
         }
     }
 
-    pub async fn remember_and_wait(
+    pub async fn remember(
         &self,
         text: &str,
         poll_interval: Duration,
         timeout: Duration,
     ) -> Result<RememberResult, MemWalError> {
-        let accepted = self.remember(text).await?;
+        let accepted = self.remember_async(text).await?;
         self.wait_for_remember_job(&accepted.job_id, poll_interval, timeout)
             .await
     }
