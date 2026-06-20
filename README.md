@@ -122,39 +122,42 @@ use memwal_core::MemWal;
 use memwal_core::MemWalConfig;
 use memwal_core::RecallParams;
 
-# async fn example(account_id: sui_sdk_types::Address) -> Result<(), memwal_core::MemWalError> {
-let delegate_key = DelegateKey::from_suiprivkey("suiprivkey...")?;
-let memwal = MemWal::new(MemWalConfig::new(
-    delegate_key,
-    account_id,
-    Some("https://relayer.memory.walrus.xyz".to_owned()),
-    Some("default".to_owned()),
-))
-.await?;
+async fn example(account_id: sui_sdk_types::Address) -> Result<(), memwal_core::MemWalError> {
+    let delegate_key = DelegateKey::from_suiprivkey("suiprivkey...")?;
 
-let accepted = memwal.remember("User prefers dark mode.").await?;
-let remembered = memwal
-    .wait_for_remember_job(
-        &accepted.job_id,
-        Duration::from_millis(1500),
-        Duration::from_secs(60),
+    let memwal = MemWal::new(
+        MemWalConfig::new(
+            delegate_key,
+            account_id,
+            Some("https://relayer.memory.walrus.xyz".to_owned()),
+            Some("default".to_owned()),
+        ),
     )
     .await?;
 
-let recalled = memwal
-    .recall(RecallParams {
-        query: "What does the user prefer?".to_owned(),
-        limit: Some(5),
-        namespace: None,
-        top_k: None,
-        max_distance: None,
-    })
-    .await?;
+    let remembered = memwal
+        .remember(
+            "User prefers dark mode.",
+            Duration::from_millis(1500),
+            Duration::from_secs(60),
+        )
+        .await?;
 
-println!("stored memory: {}", remembered.id);
-println!("matches: {}", recalled.results.len());
-# Ok(())
-# }
+    let recalled = memwal
+        .recall(RecallParams {
+            query: "What does the user prefer?".to_owned(),
+            limit: Some(5),
+            namespace: None,
+            top_k: None,
+            max_distance: None,
+        })
+        .await?;
+
+    println!("stored memory: {}", remembered.id);
+    println!("matches: {}", recalled.results.len());
+
+    Ok(())
+}
 ```
 
 Common `MemWal` methods:
@@ -179,17 +182,21 @@ accepts a registry ID string and a `ProvisionAccountMode`:
 use memwal_core::AccountClient;
 use memwal_core::ProvisionAccountMode;
 
-# async fn example(account_client: AccountClient, delegate_public_key: [u8; 32]) -> Result<(), memwal_core::MemWalError> {
-let account_id = account_client
-    .provision_account(
-        "0x...",
-        ProvisionAccountMode::ReuseOrCreate,
-        delegate_public_key,
-        "my-app",
-    )
-    .await?;
-# Ok(())
-# }
+async fn example(
+    account_client: AccountClient,
+    delegate_public_key: [u8; 32],
+) -> Result<(), memwal_core::MemWalError> {
+    let account_id = account_client
+        .provision_account(
+            "0x...",
+            ProvisionAccountMode::ReuseOrCreate,
+            delegate_public_key,
+            "my-app",
+        )
+        .await?;
+
+    Ok(())
+}
 ```
 
 ## License
