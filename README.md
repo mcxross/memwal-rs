@@ -107,6 +107,32 @@ Optional demo variables:
 - `MEMWAL_RELAYER_CONFIG_URL` or `MEMWAL_RELAYER_CONFIG_PATH`: explicit relayer config URL.
 - `MEMWAL_NAMESPACE`: default namespace for memory operations.
 
+### Account Client
+
+Use `AccountClient` directly when you need fine-grained transaction control. `provision_account`
+accepts a registry ID string and a `ProvisionAccountMode`:
+
+```rust
+use memwal_core::AccountClient;
+use memwal_core::ProvisionAccountMode;
+
+async fn example(
+    account_client: AccountClient,
+    delegate_public_key: [u8; 32],
+) -> Result<(), memwal_core::MemWalError> {
+    let account_id = account_client
+        .provision_account(
+            "0x...",
+            ProvisionAccountMode::ReuseOrCreate,
+            delegate_public_key,
+            "my-app",
+        )
+        .await?;
+
+    Ok(())
+}
+```
+
 ## Lower-Level APIs
 
 ### MemWal Client
@@ -173,31 +199,55 @@ Common `MemWal` methods:
 - `health()` and `compatibility()` inspect relayer status.
 - `delegate_public_key_hex()` returns the delegate public key used for request signing.
 
-### Account Client
+### Manual Client (Zero-Trust Flow)
 
-Use `AccountClient` directly when you need fine-grained transaction control. `provision_account`
-accepts a registry ID string and a `ProvisionAccountMode`:
+For strict security requirements, the `MemWalManual` client allows you to handle embeddings, encryption, and storage locally on your client machine before ever touching the relayer. The relayer will never see your plaintext data.
 
 ```rust
-use memwal_core::AccountClient;
-use memwal_core::ProvisionAccountMode;
+use memwal_core::manual::{
+    MemWalManual, MemWalManualConfig, OllamaEmbeddingProvider, SuiNetwork, WalrusHttpStore,
+};
+use memwal_core::sui::Ed25519Signer;
+use memwal_core::types::ManualRecallOptions;
+use std::sync::Arc;
 
-async fn example(
-    account_client: AccountClient,
-    delegate_public_key: [u8; 32],
-) -> Result<(), memwal_core::MemWalError> {
-    let account_id = account_client
-        .provision_account(
-            "0x...",
-            ProvisionAccountMode::ReuseOrCreate,
-            delegate_public_key,
-            "my-app",
-        )
-        .await?;
+async fn manual_example(
+    delegate_suiprivkey: &str,
+    account_id: sui_sdk_types::Address,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let signer = Arc::new(Ed25519Signer::from_suiprivkey(delegate_suiprivkey)?);
+    let embedder = Arc::new(OllamaEmbeddingProvider::new("nomic-embed-text-v2-moe"));
+    let store = Arc::new(WalrusHttpStore::new("https://publisher.walrus-testnet.walrus.space", "https://aggregator.walrus-testnet.walrus.space"));
+
+    let config = MemWalManualConfig::new(
+        account_id,
+        "0x...package_id...",
+        SuiNetwork::Testnet,
+        signer,
+        embedder,
+        store,
+    ).with_relayer_url("https://relayer.memory.walrus.xyz");
+
+    let memwal = MemWalManual::new(config);
+
+    // 1. Embeds text locally, encrypts it with Seal, uploads to Walrus, then registers with Relayer
+    let remembered = memwal.remember_manual("Top secret local text.", Some("default")).await?;
+    println!("Stored secure memory: {}", remembered.blob_id);
+
+    // 2. Searches relayer, downloads encrypted blob from Walrus, decrypts it locally with Seal
+    let recalled = memwal.recall_manual(ManualRecallOptions {
+        query: "What is secret?".to_owned(),
+        namespace: Some("default".to_owned()),
+        ..Default::default()
+    }).await?;
+
+    println!("Matches: {}", recalled.results.len());
 
     Ok(())
 }
 ```
+
+*Note: The `OllamaEmbeddingProvider` is great for testing this zero-trust workflow locally. If pointing it at the public MemWal relayer, it handles automatically padding your local model's embeddings to the required 1536-dimensional size so the transaction succeeds.*
 
 ## License
 

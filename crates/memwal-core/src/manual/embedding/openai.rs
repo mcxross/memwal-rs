@@ -1,15 +1,8 @@
 use std::future::Future;
 use std::pin::Pin;
-use std::sync::Arc;
 
 use crate::error::MemWalError;
-
-pub trait EmbeddingProvider: Send + Sync {
-    fn embed<'a>(
-        &'a self,
-        text: &'a str,
-    ) -> Pin<Box<dyn Future<Output = Result<Vec<f32>, MemWalError>> + Send + 'a>>;
-}
+use super::EmbeddingProvider;
 
 #[derive(Clone)]
 pub struct OpenAiEmbeddingProvider {
@@ -92,5 +85,3 @@ impl EmbeddingProvider for OpenAiEmbeddingProvider {
         })
     }
 }
-
-pub(crate) type SharedEmbeddingProvider = Arc<dyn EmbeddingProvider>;

@@ -4257,6 +4257,7 @@ name = "memwal-demo"
 version = "0.1.0"
 dependencies = [
  "memwal-core",
+ "sui-sdk-types 0.3.1 (git+https://github.com/mystenlabs/sui-rust-sdk?rev=51ea346)",
  "tokio",
 ]
 

@@ -96,7 +96,7 @@ impl RelayerConfig {
         self
     }
 
-    pub(crate) fn package_address(&self) -> Result<sui_sdk_types::Address, MemWalError> {
+    pub fn package_address(&self) -> Result<sui_sdk_types::Address, MemWalError> {
         sui_sdk_types::Address::from_str(&self.package_id).map_err(MemWalError::object_id_parse)
     }
 }

@@ -5,4 +5,5 @@ edition = "2024"
 
 [dependencies]
 memwal-core = { workspace = true }
+sui-sdk-types = { workspace = true }
 tokio = { workspace = true }
