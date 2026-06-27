@@ -1,8 +1,8 @@
 use std::future::Future;
 use std::pin::Pin;
 
-use crate::error::MemWalError;
 use super::EmbeddingProvider;
+use crate::error::MemWalError;
 
 #[derive(Clone)]
 pub struct OpenAiEmbeddingProvider {

@@ -1,8 +1,8 @@
 use std::future::Future;
 use std::pin::Pin;
 
-use crate::error::MemWalError;
 use super::EmbeddingProvider;
+use crate::error::MemWalError;
 
 #[derive(Clone)]
 pub struct OllamaEmbeddingProvider {
@@ -67,7 +67,7 @@ impl EmbeddingProvider for OllamaEmbeddingProvider {
                 .ok_or_else(|| MemWalError::embedding("embedding API returned no embedding"))?;
 
             // Hack: The public MemWal relayer expects exactly 1536 dimensions.
-            // If the local model (like nomic) outputs fewer dimensions (e.g. 768), 
+            // If the local model (like nomic) outputs fewer dimensions (e.g. 768),
             // we pad the remainder with zeroes so the relayer database accepts the insertion.
             if vector.len() < 1536 {
                 vector.resize(1536, 0.0);

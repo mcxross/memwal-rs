@@ -47,10 +47,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .unwrap_or_else(|_| "https://publisher.walrus-testnet.walrus.space".to_owned());
     let walrus_aggregator_url = env::var("WALRUS_AGGREGATOR_URL")
         .unwrap_or_else(|_| "https://aggregator.walrus-testnet.walrus.space".to_owned());
-    let walrus_store = Arc::new(WalrusHttpStore::testnet().with_urls(
-        walrus_publisher_url,
-        walrus_aggregator_url,
-    ));
+    let walrus_store =
+        Arc::new(WalrusHttpStore::testnet().with_urls(walrus_publisher_url, walrus_aggregator_url));
 
     let config = MemWalManualConfig::new(
         delegate_key,
