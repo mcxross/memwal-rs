@@ -17,30 +17,26 @@ pub(crate) const CLOCK_ID: Address =
     Address::from_static("0x0000000000000000000000000000000000000000000000000000000000000006");
 
 pub(crate) async fn execute_account_transaction(
-    client: &tokio::sync::Mutex<sui_rpc::Client>,
+    client: &sui_rpc::Client,
     signer: &dyn MemWalSigner,
     builder: TransactionBuilder,
 ) -> Result<sui_rpc::proto::sui::rpc::v2::ExecuteTransactionResponse, MemWalError> {
-    let transaction = {
-        let mut client = client.lock().await;
-        builder
-            .build(&mut client)
-            .await
-            .map_err(|error| MemWalError::config(error.to_string()))?
-    };
+    let mut cloned_client = client.clone();
+    let transaction = builder
+        .build(&mut cloned_client)
+        .await
+        .map_err(|error| MemWalError::config(error.to_string()))?;
     let signature = signer.sign_transaction(&transaction)?;
     let request = ExecuteTransactionRequest::new(transaction.into())
         .with_signatures(vec![signature.into()])
         .with_read_mask(FieldMask::from_str("*"));
 
-    let response = {
-        let mut client = client.lock().await;
-        client
-            .execute_transaction_and_wait_for_checkpoint(request, Duration::from_secs(30))
-            .await
-            .map_err(|error| MemWalError::sui_rpc(tonic::Status::internal(error.to_string())))?
-            .into_inner()
-    };
+    let response = client
+        .clone()
+        .execute_transaction_and_wait_for_checkpoint(request, Duration::from_secs(30))
+        .await
+        .map_err(|error| MemWalError::sui_rpc(tonic::Status::internal(error.to_string())))?
+        .into_inner();
 
     let status = response.transaction().effects().status();
     if !status.success() {

@@ -25,8 +25,13 @@ pub struct WalrusHttpStore {
 
 impl WalrusHttpStore {
     pub fn mainnet() -> Self {
+        let client = reqwest::Client::builder()
+            .connect_timeout(std::time::Duration::from_secs(10))
+            .timeout(std::time::Duration::from_secs(30))
+            .build()
+            .unwrap_or_else(|_| reqwest::Client::new());
         Self {
-            client: reqwest::Client::new(),
+            client,
             publisher_url: "https://publisher.walrus-mainnet.walrus.space".to_owned(),
             aggregator_url: "https://aggregator.walrus-mainnet.walrus.space".to_owned(),
             epochs: 50,
@@ -34,8 +39,13 @@ impl WalrusHttpStore {
     }
 
     pub fn testnet() -> Self {
+        let client = reqwest::Client::builder()
+            .connect_timeout(std::time::Duration::from_secs(10))
+            .timeout(std::time::Duration::from_secs(30))
+            .build()
+            .unwrap_or_else(|_| reqwest::Client::new());
         Self {
-            client: reqwest::Client::new(),
+            client,
             publisher_url: "https://publisher.walrus-testnet.walrus.space".to_owned(),
             aggregator_url: "https://aggregator.walrus-testnet.walrus.space".to_owned(),
             epochs: 50,

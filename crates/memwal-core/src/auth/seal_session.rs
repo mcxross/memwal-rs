@@ -8,6 +8,7 @@ use chrono::TimeZone;
 use chrono::Utc;
 use tokio::sync::Mutex;
 use tokio::sync::Notify;
+use zeroize::Zeroizing;
 
 use crate::error::MemWalError;
 use crate::sui::Ed25519Signer;
@@ -40,7 +41,7 @@ struct SessionState {
 
 #[derive(Debug, Clone)]
 struct CachedSession {
-    header_value: String,
+    header_value: Zeroizing<String>,
     expires_at: chrono::DateTime<Utc>,
 }
 
@@ -150,7 +151,7 @@ impl SealHeaderProvider for SealSessionManager {
                             - chrono::TimeDelta::seconds(SESSION_REFRESH_EARLY.as_secs() as i64)
                             > Utc::now()
                     {
-                        return Ok(cached.header_value.clone());
+                        return Ok((*cached.header_value).clone());
                     }
 
                     if state.building {
@@ -171,7 +172,7 @@ impl SealHeaderProvider for SealSessionManager {
                 state.building = false;
                 if let Ok(header_value) = &built {
                     state.cached = Some(CachedSession {
-                        header_value: header_value.clone(),
+                        header_value: Zeroizing::new(header_value.clone()),
                         expires_at: Utc::now()
                             + chrono::Duration::minutes(i64::from(SESSION_TTL_MINUTES)),
                     });

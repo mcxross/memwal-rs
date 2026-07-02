@@ -1,8 +1,6 @@
 use std::str::FromStr;
 use std::sync::Arc;
 
-use tokio::sync::Mutex;
-
 use crate::error::MemWalError;
 use crate::sui::MemWalSigner;
 use crate::sui::add_delegate_key_builder;
@@ -22,7 +20,7 @@ pub enum ProvisionAccountMode {
 }
 
 pub struct AccountClient {
-    rpc_client: Mutex<sui_rpc::Client>,
+    rpc_client: sui_rpc::Client,
     signer: Arc<dyn MemWalSigner>,
     package_id: sui_sdk_types::Address,
 }
@@ -34,7 +32,7 @@ impl AccountClient {
         package_id: sui_sdk_types::Address,
     ) -> Self {
         Self {
-            rpc_client: Mutex::new(rpc_client),
+            rpc_client,
             signer,
             package_id,
         }
@@ -122,7 +120,7 @@ impl AccountClient {
         registry_id: sui_sdk_types::Address,
         wallet_address: sui_sdk_types::Address,
     ) -> Result<Option<sui_sdk_types::Address>, MemWalError> {
-        let mut client = self.rpc_client.lock().await.clone();
+        let mut client = self.rpc_client.clone();
 
         let mut req = GetObjectRequest::default();
         req.object_id = Some(registry_id.to_string());

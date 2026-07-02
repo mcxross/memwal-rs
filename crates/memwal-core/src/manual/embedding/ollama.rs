@@ -13,8 +13,13 @@ pub struct OllamaEmbeddingProvider {
 
 impl OllamaEmbeddingProvider {
     pub fn new(model: impl Into<String>) -> Self {
+        let client = reqwest::Client::builder()
+            .connect_timeout(std::time::Duration::from_secs(10))
+            .timeout(std::time::Duration::from_secs(30))
+            .build()
+            .unwrap_or_else(|_| reqwest::Client::new());
         Self {
-            client: reqwest::Client::new(),
+            client,
             api_url: "http://127.0.0.1:11434/api/embed".to_owned(),
             model: model.into(),
         }

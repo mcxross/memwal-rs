@@ -87,5 +87,5 @@ pub struct SealServerConfig {
     pub weight: u8,
     pub aggregator_url: Option<String>,
     pub api_key_name: Option<String>,
-    pub api_key: Option<String>,
+    pub api_key: Option<zeroize::Zeroizing<String>>,
 }

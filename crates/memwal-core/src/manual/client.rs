@@ -74,7 +74,11 @@ impl MemWalManualConfig {
             sui_rpc_url: None,
             server_url: "https://relayer.memwal.ai/".to_owned(),
             namespace: "default".to_owned(),
-            http_client: reqwest::Client::new(),
+            http_client: reqwest::Client::builder()
+                .connect_timeout(std::time::Duration::from_secs(10))
+                .timeout(std::time::Duration::from_secs(30))
+                .build()
+                .unwrap_or_else(|_| reqwest::Client::new()),
             embedding_provider,
             walrus_store,
             seal_servers: None,
@@ -215,13 +219,23 @@ impl MemWalManual {
             });
         }
 
-        let mut failures = Vec::new();
         let mut downloaded = Vec::new();
-        for hit in &search.results {
-            match self.walrus.download(&hit.blob_id).await {
-                Ok(bytes) => downloaded.push((hit.blob_id.clone(), hit.distance, bytes)),
+        let mut failures = Vec::new();
+        let download_futures = search.results.iter().map(|hit| {
+            let walrus = self.walrus.clone();
+            let blob_id = hit.blob_id.clone();
+            let distance = hit.distance;
+            async move {
+                let res = walrus.download(&blob_id).await;
+                (blob_id, distance, res)
+            }
+        });
+        let download_results = futures::future::join_all(download_futures).await;
+        for (blob_id, distance, res) in download_results {
+            match res {
+                Ok(bytes) => downloaded.push((blob_id, distance, bytes)),
                 Err(error) => failures.push(ManualRecallFailure {
-                    blob_id: hit.blob_id.clone(),
+                    blob_id,
                     stage: ManualRecallFailureStage::Download,
                     message: error.to_string(),
                 }),

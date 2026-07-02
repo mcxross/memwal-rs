@@ -119,7 +119,7 @@ impl SealReqwestClient {
             .into_iter()
             .filter_map(|config| {
                 match (config.aggregator_url, config.api_key_name, config.api_key) {
-                    (Some(url), Some(name), Some(value)) => Some((url, (name, value))),
+                    (Some(url), Some(name), Some(value)) => Some((url, (name, (*value).clone()))),
                     _ => None,
                 }
             })

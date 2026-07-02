@@ -36,7 +36,7 @@ pub struct Ed25519Signer {
 impl Clone for Ed25519Signer {
     fn clone(&self) -> Self {
         Self {
-            suiprivkey: Zeroizing::new(self.suiprivkey.to_string()),
+            suiprivkey: self.suiprivkey.clone(),
         }
     }
 }

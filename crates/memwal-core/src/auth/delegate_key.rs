@@ -16,7 +16,7 @@ pub struct DelegateKey {
 impl Clone for DelegateKey {
     fn clone(&self) -> Self {
         Self {
-            secret: Zeroizing::new(*self.secret),
+            secret: self.secret.clone(),
         }
     }
 }

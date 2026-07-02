@@ -1,5 +1,6 @@
 use std::future::Future;
 use std::pin::Pin;
+use zeroize::Zeroizing;
 
 use super::EmbeddingProvider;
 use crate::error::MemWalError;
@@ -8,16 +9,21 @@ use crate::error::MemWalError;
 pub struct OpenAiEmbeddingProvider {
     client: reqwest::Client,
     api_base: String,
-    api_key: String,
+    api_key: Zeroizing<String>,
     model: String,
 }
 
 impl OpenAiEmbeddingProvider {
     pub fn new(api_key: impl Into<String>) -> Self {
+        let client = reqwest::Client::builder()
+            .connect_timeout(std::time::Duration::from_secs(10))
+            .timeout(std::time::Duration::from_secs(30))
+            .build()
+            .unwrap_or_else(|_| reqwest::Client::new());
         Self {
-            client: reqwest::Client::new(),
+            client,
             api_base: "https://api.openai.com/v1".to_owned(),
-            api_key: api_key.into(),
+            api_key: Zeroizing::new(api_key.into()),
             model: "text-embedding-3-small".to_owned(),
         }
     }
@@ -61,7 +67,7 @@ impl EmbeddingProvider for OpenAiEmbeddingProvider {
                     "{}/embeddings",
                     self.api_base.trim_end_matches('/')
                 ))
-                .bearer_auth(&self.api_key)
+                .bearer_auth(self.api_key.as_str())
                 .json(&EmbedRequest {
                     model: &self.model,
                     input: text,

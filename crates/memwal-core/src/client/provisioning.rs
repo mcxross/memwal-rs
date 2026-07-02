@@ -1,5 +1,6 @@
 use std::str::FromStr;
 use std::sync::Arc;
+use zeroize::Zeroizing;
 
 use crate::account::AccountClient;
 use crate::account::ProvisionAccountMode;
@@ -17,8 +18,8 @@ const DEFAULT_DELEGATE_LABEL: &str = "memwal-rust";
 
 #[derive(Clone, Debug)]
 pub struct MemWalProvisionConfig {
-    delegate_suiprivkey: String,
-    wallet_suiprivkey: Option<String>,
+    delegate_suiprivkey: Zeroizing<String>,
+    wallet_suiprivkey: Option<Zeroizing<String>>,
     account_id: Option<String>,
     registry_id: Option<String>,
     mode: ProvisionAccountMode,
@@ -31,7 +32,7 @@ pub struct MemWalProvisionConfig {
 impl MemWalProvisionConfig {
     pub fn new(delegate_suiprivkey: impl Into<String>) -> Self {
         Self {
-            delegate_suiprivkey: delegate_suiprivkey.into(),
+            delegate_suiprivkey: Zeroizing::new(delegate_suiprivkey.into()),
             wallet_suiprivkey: None,
             account_id: None,
             registry_id: None,
@@ -44,7 +45,7 @@ impl MemWalProvisionConfig {
     }
 
     pub fn wallet_suiprivkey(mut self, wallet_suiprivkey: impl Into<String>) -> Self {
-        self.wallet_suiprivkey = Some(wallet_suiprivkey.into());
+        self.wallet_suiprivkey = Some(Zeroizing::new(wallet_suiprivkey.into()));
         self
     }
 
@@ -127,8 +128,9 @@ impl MemWal {
         let delegate_address = delegate_key.sui_address();
         let wallet_suiprivkey = config
             .wallet_suiprivkey
-            .as_deref()
-            .unwrap_or(&config.delegate_suiprivkey);
+            .as_ref()
+            .map(|k| k.as_str())
+            .unwrap_or(config.delegate_suiprivkey.as_str());
         let wallet_signer = Ed25519Signer::from_suiprivkey(wallet_suiprivkey)?;
         let signer: Arc<dyn MemWalSigner> = Arc::new(wallet_signer);
 

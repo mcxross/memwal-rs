@@ -29,9 +29,13 @@ pub(crate) struct RelayerTransport {
 
 impl RelayerTransport {
     pub(crate) fn new(server_url: &str) -> Result<Self, MemWalError> {
+        let http = reqwest::Client::builder()
+            .connect_timeout(std::time::Duration::from_secs(10))
+            .timeout(std::time::Duration::from_secs(30))
+            .build()?;
         Ok(Self {
             base_url: normalize_server_url(server_url)?,
-            http: reqwest::Client::new(),
+            http,
             compatibility: Arc::new(Mutex::new(None)),
             public_config: Arc::new(Mutex::new(None)),
         })
